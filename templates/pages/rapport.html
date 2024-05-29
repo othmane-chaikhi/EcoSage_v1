@@ -1,0 +1,90 @@
+{%load static %}
+<!DOCTYPE html>
+<html :class="{ 'theme-dark': dark }" x-data="data()" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rapports - ÉcoSage</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'assets/css/tailwind.output.css' %}" />
+    <script
+      src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
+      defer
+    ></script>
+    <script src="{% static 'assets/js/init-alpine.js' %}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static '/assets/css/tailwind.output.css' %}" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
+  
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <script src="{% static 'assets/js/init-alpine.js' %}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+  </head>
+  <body>
+    <div
+      class="flex h-screen bg-gray-50 dark:bg-gray-900"
+      :class="{ 'overflow-hidden': isSideMenuOpen}"
+    >
+      <!-- Desktop sidebar -->
+      {% include 'nav.html' %}
+        <main class="h-full pb-16 overflow-y-auto">
+          <!-- Remove everything INSIDE this div to a really blank page -->
+          <div class="container px-6 mx-auto grid">
+            <h2
+              class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200"
+            >
+              Rapports
+            </h2>
+            <div class="p-4 mb-4 bg-white dark:bg-gray-800  rounded-lg shadow-xs">
+                <h4 class="mb-4 text-lg font-semibold text-gray-700 dark:text-white">Rapport de mois</h4>
+              
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div>
+                    
+                    <div class="font-bold">
+                      <div class="flex justify-between text-gray-600 dark:text-white items-center mb-2">
+                        <div class="">Balance:</div>
+                        <div>{{ balance }} dh</div></div>
+                      </div>
+                      <div class="flex justify-between text-green-600 items-center mb-2">
+                        <div class="">J'ai pris:</div>
+                        <div>{{ solde_pris }} dh</div>
+                    </div>
+                    <div class="flex justify-between text-red-600 items-center mb-2">
+                        <div>J'ai donné:</div>
+                        <div>{{ solde_depense }} dh</div>
+                    </div>
+                    <div class="flex justify-between text-orange-500 items-center mb-2">
+                        <div class="">Budget</div>
+                        <div>{{ budget }} dh</div>
+                    </div>
+                    <div class="flex justify-between text-purple-600 items-center mb-2">
+                        <div>Nombre de transactions:</div>
+                        <div>{{ transaction_count }}</div>
+                    </div>
+                    <div class="flex justify-between text-purple-600 items-center mb-2">
+                      <!-- Add these links/buttons somewhere in your rapport.html -->
+                      <a href="{% url 'download_report' 'csv' %}" class="bg-blue-500 text-white px-4 py-2 rounded">Download CSV</a>
+                      <a href="{% url 'download_report' 'xlsx' %}" class="bg-green-500 text-white px-4 py-2 rounded">Download Excel</a>
+                      <a href="{% url 'download_report' 'pdf' %}" class="bg-red-500 text-white px-4 py-2 rounded">Download PDF</a>
+  
+
+                    </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+             
+           </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

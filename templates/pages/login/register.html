@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'login/style2.css'%}">
+    <title>Login Page | EcoSage</title>
+</head>
+
+<body>
+
+    <div class="container active" id="container">
+        <div class="form-container sign-up ">
+            <form method="post" action="{% url 'register' %}">
+                {% csrf_token %}
+                <h1>Create Account</h1>
+                <span>Use your email for registration</span>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Username</label>
+                    <input type="text" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Username">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Password</label>
+                    <input type="password" name="password1" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Password">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Confirm Password</label>
+                    <input type="password" name="password2" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Confirm Password">
+                </div>
+                <button type="submit">Sign Up</button>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        {% if 'register' in message.tags %}
+                            <li class="error-message">
+                                <i class="fa fa-times-circle"></i>
+                                {{ message }}
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </form>
+        </div>
+        <div class="form-container sign-in active">
+            <form>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700">Email</label>
+                    <input type="text" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Email">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Password</label>
+                    <input type="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Password">
+                </div>
+                <div class="mb-4 flex justify-between">
+                    <a href="" class="text-sm text-blue-500 hover:underline">Forgot Your Password?</a>
+                </div>
+                <div class="mb-4">
+                    <button type="submit" class="w-full bg-blue-500 text-white px-3 py-2 rounded-lg">Sign In</button>
+                </div>
+            
+           
+                
+            </form>
+            
+        </div>
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-left">
+                    <h1>Welcome Back!</h1>
+                    <p>Enter your personal details to use all of site features</p>
+                    <button class="hidden" id="login" ><a href="{% url 'login' %}" style="text-decoration: none;color: aliceblue;">Sign In</a></button>
+                </div>
+                <div class="toggle-panel toggle-right">
+                    <h1>EcoSage</h1>
+                    <p>Register with your personal details to use all of site features</p>
+                    <button class="hidden" id="register">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,336 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>EcoSage</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="{% static 'assetsFirst/img/hero-img.png' %}" rel="icon">
+  <link href="{% static 'assetsFirst/img/hero-img.png' %}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assetsFirst/vendor/aos/aos.css' %}" rel="stylesheet">
+  <link href="{% static 'assetsFirst/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assetsFirst/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assetsFirst/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assetsFirst/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assetsFirst/vendor/remixicon/remixicon.css' %}" rel="stylesheet">
+  <link href="{% static 'assetsFirst/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{% static 'assetsFirst/css/style.css' %}" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="fixed-top ">
+    <div class="container d-flex align-items-center">
+
+      <h1 class="logo me-auto"><a href="{% url 'index' %}">EcoSage</a></h1>
+      <!-- Uncomment below if you prefer to use an image logo -->
+      <!-- <a href="index.html" class="logo me-auto"><img src="assetsFirst/img/logo.png" alt="" class="img-fluid"></a>-->
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link scrollto active" href="#hero">Accueil</a></li>
+          <li><a class="nav-link scrollto" href="#about">À propos</a></li>
+          <li><a class="nav-link scrollto" href="#services">Services</a></li>
+          <li><a class="nav-link scrollto" href="#team">Équipe</a></li>
+          <li><a class="getstarted scrollto" href="{% url 'login' %}">Connection</a></li>
+
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
+    </div>
+  </header><!-- End Header -->
+
+  <!-- ======= Hero Section ======= -->
+  <section id="hero" class="d-flex align-items-center">
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1" data-aos="fade-up" data-aos-delay="200">
+          <h1>Soyez un économiseur sage</h1>
+          <h2>Optimisez la Gestion Financière de Votre Entreprise avec des Solutions Expertes en Gestion Budgétaire, Contrôle Financier et Suivi des Finances Personnelles.</h2>
+          <div class="d-flex justify-content-center justify-content-lg-start">
+            <a href="#about" class="btn-get-started scrollto">Découverte</a>
+          </div>
+        </div>
+        <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="zoom-in" data-aos-delay="200">
+          <img src="{% static 'assetsFirst/img/hero-img.png' %}" class="img-fluid animated" alt="">
+        </div>
+      </div>
+    </div>
+
+  </section><!-- End Hero -->
+
+  <main id="main">
+    <!-- ======= About Us Section ======= -->
+    <section id="about" class="about">
+      <div class="container" data-aos="fade-up">
+
+        <div class="section-title">
+          <h2>À propos de nous</h2>
+        </div>
+
+        <div class="row content">
+          <div class="col-lg-6">
+            <p>
+              Chez EcoSage, nous nous engageons à vous aider à gérer efficacement vos finances personnelles. Notre approche intègre la gestion budgétaire, le contrôle financier, le suivi des dépenses, le suivi des finances personnelles et la gestion des comptes. Grâce à nos solutions complètes, nous vous offrons les outils nécessaires pour une gestion proactive et efficace de vos finances. Faites confiance à notre expertise pour vous accompagner vers la réussite financière.
+
+            </p>
+            <ul>
+              <li><i class="ri-check-double-line"></i> Maîtrisez vos dépenses et optimisez votre budget avec nos outils de gestion financière.</li>
+              <li><i class="ri-check-double-line"></i> Obtenez des conseils avisés pour maximiser vos économies et investissements.</li>
+              <li><i class="ri-check-double-line"></i> Suivez facilement vos transactions financières pour une vue d'ensemble claire de vos finances.</li>
+            </ul>
+          </div>
+          <div class="col-lg-6 pt-4 pt-lg-0">
+            <p>
+              Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+              velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+              culpa qui officia deserunt mollit anim id est laborum.
+            </p>
+            <a href="{% url 'login' %}" class="btn-learn-more">Explorez maintenant</a>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- End About Us Section -->
+    <!-- ======= Why Us Section ======= -->
+    <section id="why-us" class="why-us section-bg">
+      <div class="container-fluid" data-aos="fade-up">
+        <div class="row">
+          <div class="col-lg-7 d-flex flex-column justify-content-center align-items-stretch order-2 order-lg-1">
+            <div class="content">
+              <h3>Optez pour nous et découvrez pourquoi nous sommes le choix idéal <strong>pour votre gestion financière</strong></h3>
+              <p>
+                Chez [Nom de votre entreprise], nous vous offrons des solutions de gestion financière complètes pour vous aider à optimiser votre argent et à planifier votre avenir financier avec confiance.
+              </p>
+            </div>
+            <div class="accordion-list">
+              <ul>
+                <li>
+                  <a data-bs-toggle="collapse" class="collapse" data-bs-target="#accordion-list-1"><span>01</span> Maîtrisez votre budget et contrôlez vos dépenses quotidiennes <i class="bx bx-chevron-down icon-show"></i><i class="bx bx-chevron-up icon-close"></i></a>
+                  <div id="accordion-list-1" class="collapse show" data-bs-parent=".accordion-list">
+                    <p>
+                      Avec nos outils de gestion budgétaire avancés, vous pouvez suivre vos dépenses et planifier efficacement votre budget pour atteindre vos objectifs financiers.
+                    </p>
+                  </div>
+                </li>
+                <li>
+                  <a data-bs-toggle="collapse" data-bs-target="#accordion-list-2" class="collapsed"><span>02</span> Profitez d'un suivi financier détaillé et précis <i class="bx bx-chevron-down icon-show"></i><i class="bx bx-chevron-up icon-close"></i></a>
+                  <div id="accordion-list-2" class="collapse" data-bs-parent=".accordion-list">
+                    <p>
+                      Notre service de suivi financier vous offre une vision claire de vos transactions et de votre situation financière, vous permettant ainsi de prendre des décisions éclairées.
+                    </p>
+                  </div>
+                </li>
+                <li>
+                  <a data-bs-toggle="collapse" data-bs-target="#accordion-list-3" class="collapsed"><span>03</span> Bénéficiez d'une gestion personnalisée de vos comptes <i class="bx bx-chevron-down icon-show"></i><i class="bx bx-chevron-up icon-close"></i></a>
+                  <div id="accordion-list-3" class="collapse" data-bs-parent=".accordion-list">
+                    <p>
+                      Nous vous aidons à gérer efficacement vos comptes, en vous fournissant des conseils et des solutions adaptés à vos besoins spécifiques pour optimiser votre situation financière.
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-5 align-items-stretch order-1 order-lg-2 img" 
+          style="
+            background-image: url('{% static 'assetsFirst/img/why-us.png' %}');
+           -webkit-background-image: url('{% static 'assetsFirst/img/why-us.png' %}'');
+           -moz-background-image: url('{% static 'assetsFirst/img/why-us.png' %}'');
+           " data-aos="zoom-in" data-aos-delay="150">&nbsp;</div>
+        </div>
+      </div>
+    </section><!-- End Why Us Section -->
+    <!-- ======= Services Section ======= -->
+<section id="services" class="services section-bg">
+  <div class="container" data-aos="fade-up">
+
+    <div class="section-title">
+      <h2>Nos Services</h2>
+      <p>Nous offrons une gamme complète de services pour vous accompagner dans la gestion efficace de vos finances.</p>
+    </div>
+
+    <div class="row">
+      <div class="col-xl-3 col-md-6 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="100">
+        <div class="icon-box">
+          <div class="icon"><i class="bi bi-gear-wide"></i></div>
+          <h4><a href="#">Gestion Budgétaire</a></h4>
+          <p>Maîtrisez votre budget et planifiez vos finances avec nos outils de gestion budgétaire avancés.</p>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6 d-flex align-items-stretch mt-4 mt-md-0" data-aos="zoom-in" data-aos-delay="200">
+        <div class="icon-box">
+          <div class="icon"><i class="bi bi-dpad-fill"></i></div>
+          <h4><a href="#">Contrôle Financier</a></h4>
+          <p>Assurez le contrôle et la gestion efficace de vos finances pour atteindre vos objectifs financiers.</p>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6 d-flex align-items-stretch mt-4 mt-xl-0" data-aos="zoom-in" data-aos-delay="300">
+        <div class="icon-box">
+          <div class="icon"><i class="bi bi-lightning-charge-fill"></i></i></div>
+          <h4><a href="#">Suivi Financier</a></h4>
+          <p>Suivez vos transactions et vos dépenses pour une meilleure compréhension de votre situation financière.</p>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6 d-flex align-items-stretch mt-4 mt-xl-0" data-aos="zoom-in" data-aos-delay="400">
+        <div class="icon-box">
+          <div class="icon"><i class="bx bx-layer"></i></div>
+          <h4><a href="#">Gestion des Comptes</a></h4>
+          <p>Bénéficiez d'une gestion personnalisée de vos comptes pour optimiser votre situation financière.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section><!-- End Services Section -->
+
+    <!-- ======= Team Section ======= -->
+    <section id="team" class="team section-bg">
+      <div class="container" data-aos="fade-up">
+
+        <div class="section-title">
+          <h2>Équipe</h2>
+          <p>Découvrez les membres talentueux qui composent notre équipe dévouée.</p>
+        </div>
+
+        <div class="row">
+
+          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="100">
+            <div class="member d-flex align-items-start">
+              <div class="pic"><img src="{% static 'assetsFirst/img/team/oth.png' %}" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>Othmane CHAIKHI</h4>
+                <span>Développeur back-end</span>
+                <p>🎓 Étudiant en Ingénierie Informatique & Réseaux à l'EMSI 💻 </p>
+                <div class="social">
+                  <a href="https://www.facebook.com/othmane.chaikhi.58?locale=fr_FR"><i class="ri-facebook-fill"></i></a>
+                  <a href="https://www.instagram.com/biker.x_?igsh=c211eXJoa2c0aHRq"><i class="ri-instagram-fill"></i></a>
+                  <a href="https://www.linkedin.com/in/othmanechaikhi/"> <i class="ri-linkedin-box-fill"></i> </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6 mt-4 mt-lg-0" data-aos="zoom-in" data-aos-delay="200">
+            <div class="member d-flex align-items-start">
+              <div class="pic"><img src="{% static 'assetsFirst/img/team/oth2.png' %}" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>Othman AIT Taleb</h4>
+                <span>Développeur Front-end</span>
+                <p>🎓 Étudiant en Ingénierie Informatique & Réseaux à l'EMSI 💻 </p>
+                <div class="social">
+                  <a href="https://www.facebook.com/share/uWCHCFtNmLeSrcfE/?mibextid=qi2Omg"><i class="ri-facebook-fill"></i></a>
+                  <a href="https://www.instagram.com/3tttman.at?utm_source=qr&igsh=MW50N2s2anZwc2FuZQ=="><i class="ri-instagram-fill"></i></a>
+                  <a href="https://www.linkedin.com/in/othman-ait-taleb-b31791247?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"> <i class="ri-linkedin-box-fill"></i> </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6 mt-4" data-aos="zoom-in" data-aos-delay="300">
+            <div class="member d-flex align-items-start">
+              <div class="pic"><img src="{% static 'assetsFirst/img/team/team-4.jpg' %}" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>Mme OUFKIR</h4>
+                <span>Encadrant</span>
+                <p>Quisquam facilis cum velit laborum corrupti fuga rerum quia</p>
+                <div class="social">
+                  <a href=""><i class="ri-twitter-fill"></i></a>
+                  <a href=""><i class="ri-facebook-fill"></i></a>
+                  <a href=""><i class="ri-instagram-fill"></i></a>
+                  <a href=""> <i class="ri-linkedin-box-fill"></i> </a>
+                </div>
+              </div>
+            </div>
+          </div>
+<!-- 
+          <div class="col-lg-6 mt-4" data-aos="zoom-in" data-aos-delay="400">
+            <div class="member d-flex align-items-start">
+              <div class="pic"><img src="assetsFirst/img/team/team-4.jpg" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>Amanda Jepson</h4>
+                <span>Accountant</span>
+                <p>Dolorum tempora officiis odit laborum officiis et et accusamus</p>
+                <div class="social">
+                  <a href=""><i class="ri-twitter-fill"></i></a>
+                  <a href=""><i class="ri-facebook-fill"></i></a>
+                  <a href=""><i class="ri-instagram-fill"></i></a>
+                  <a href=""> <i class="ri-linkedin-box-fill"></i> </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div> -->
+
+      </div>
+    </section>
+    <!-- End Team Section -->
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+
+          <div class="col-lg-3 col-md-6 footer-contact">
+            <h3>EcoSage</h3> 
+          </div>
+
+          <div class="col-lg-6  col-md-6 footer-links">
+            <h5>Transformez votre gestion financière avec EcoSage, votre sage de l'économie. Simplifiez votre budget, maximisez vos économies et prenez le contrôle de vos finances dès aujourd'hui !</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer-bottom clearfix">
+      <div class="copyright">
+        &copy; Copyright <strong><span>EcoSage</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        Designed by Emsi Students
+      </div>
+    </div>
+  </footer><!-- End Footer -->
+
+  <div id="preloader"></div>
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'assetsFirst/vendor/aos/aos.js' %}"></script>
+  <script src="{% static 'assetsFirst/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assetsFirst/vendor/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'assetsFirst/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
+  <script src="{% static 'assetsFirst/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'assetsFirst/vendor/waypoints/noframework.waypoints.js' %}"></script>
+
+  <!-- Template Main JS File -->
+  <script src="{% static 'assetsFirst/js/main.js' %}"></script>
+
+</body>
+
+</html>
+
+

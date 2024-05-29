@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'login/style2.css'%}">
+    <title>Login Page | EcoSage</title>
+    <style>
+        @import url('//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css');
+        .error-msg {
+  color: #D8000C;
+  background-color: #FFBABA;
+}
+.messages{
+    background:none;
+}
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="container">
+        <div class="form-container sign-up ">
+            <form method="post" action="{% url 'register' %}">
+                {% csrf_token %}
+                <h1>Create Account</h1>
+                <span>Use your email for registration</span>
+                <input type="text" name="username" placeholder="Name">
+                <input type="email" name="email" placeholder="Email">
+                <input type="password" name="password" placeholder="Password">
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+        <div class="form-container sign-in active">
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-gray-700">Username</label>
+                    <input type="text" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Username">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700">Password</label>
+                    <input type="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Password">
+                </div>
+                <div class="mb-4 flex justify-between">
+                    <a href="{% url 'forgot' %}" class="text-sm text-blue-500 hover:underline">Forgot Your Password?</a>
+                </div>
+                <div class="mb-4">
+                    <button type="submit" class="w-full bg-blue-500 text-white px-3 py-2 rounded-lg">Sign In</button>
+                </div>
+             
+                <div class="text-center">
+                    <p class="text-gray-700">Don't have an account? <a href="{%  url 'register' %}" class="text-blue-500 hover:underline">Sign Up</a></p>
+                </div>
+                {% if messages %}
+                <ul style="list-style: none;">
+                    {% for message in messages %}
+                        {% if 'login' in message.tags %}
+                            <li class="error-message "
+                            style="color: #D8000C; ">
+                                <i class="fa fa-times-circle"></i>
+                                {{ message }}
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+
+    
+            </form>
+            
+        </div>
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-left">
+                    <h1>Welcome Back!</h1>
+                    <p>Enter your personal details to use all of site features</p>
+                    <button class="hidden" id="login" >Sign In</button>
+                </div>
+                <div class="toggle-panel toggle-right">
+                    <h1>EcoSage</h1>
+                    <p>Register with your personal details to use all of site features</p>
+                    <button class="hidden" id="register"><a href="{% url 'register' %}" style="text-decoration: none;color: aliceblue;">Sign Up</a></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <script src="{% static 'login/script.js' %}"></script> -->
+</body>
+
+</html>
