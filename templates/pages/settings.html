@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blank - Windmill Dashboard</title>
+    <title>ÉcoSage | Settings</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/css/tailwind.output.css' %}">
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
@@ -333,7 +333,7 @@
                 <button class="align-middle rounded-full focus:shadow-outline-purple focus:outline-none"
                 @click="toggleProfileMenu" @keydown.escape="closeProfileMenu" aria-label="Account" aria-haspopup="true">
             <img class="object-cover w-8 h-8 rounded-full"
-                 src="{% if user_photo %}{{ user_photo }}{% else %}https://images.unsplash.com/photo-1502378735452-bc7d86632805?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&s=aa3a807e1bbdfd4364d1f449eaa96d82{% endif %}"
+            src="{% if user_photo %}{{ user_photo }}{% else %}{% static 'assets/img/t.png' %}{% endif %}"
                  alt="Profile photo" aria-hidden="true" />
         </button>
                 <template x-if="isProfileMenuOpen">
@@ -395,6 +395,8 @@
         class="sm:w-full md:w-full lg:w-full xl:w-64 mb-4 px-6 py-3 text-lg font-medium leading-6 text-center text-orange-700 dark:text-orange-100 bg-orange-100 text-orange dark:bg-orange-600 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105">
           Établir Un Budget
         </button>
+
+
         <form method="post" action="{% url 'settings' %}">
           {% csrf_token %}
           <!-- Other form fields... -->
@@ -420,10 +422,32 @@
                 </div>
 
                 <!-- Password Form -->
-                <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
+                <div class="grid gap-6 mb-8 md:grid-cols-3 xl:grid-cols-4">
                     <button id="passwordButton" class="sm:w-full md:w-full lg:w-full xl:w-64 mb-4 px-6 py-3 text-lg font-medium leading-6 text-center text-orange-700 dark:text-orange-100 bg-orange-100 text-orange dark:bg-orange-600 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105">
                         Change Password
                     </button>
+                </div>
+                <div class=" mb-8 md:grid-cols-4 xl:grid-cols-4">
+                  <ul class="messages">
+                    {% for message in messages %}
+                        <li>
+                            {% if message.tags %}
+                                {% if message.tags == 'success' %}
+                                    <div class="p-4 mb-4 text-lg text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">{{ message }}</div>
+                                {% else %}
+                                    <div class="p-4 mb-4 text-lg text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                                        <span class="font-medium">{{ message }}</span>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="p-4 mb-4 text-lg text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                                    <span class="font-medium">{{ message }}</span>
+                                </div>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                
                 </div>
             </div>
         </main>
@@ -481,7 +505,10 @@
 </div>
 
     </div>
+
+
   </main>
+
     <!-- The Modal -->
     <div id="budgetModal" class="modal hidden fixed inset-0 flex items-center justify-center z-50">
         <div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">

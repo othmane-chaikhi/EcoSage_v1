@@ -14,6 +14,5 @@ urlpatterns =[
     path('jai_donne/', views.jai_donne, name='jai_donne'),
     path('transaction/<int:transaction_id>/', views.transaction_detail, name='transaction_detail'),
     path('transaction/<int:transaction_id>/modify/', views.transaction_modify, name='transaction_modify'),
-    path('search_transactions/', views.search_transactions, name='search_transactions'),
-    
+    path('reset_account/', views.reset_account, name='reset_account'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

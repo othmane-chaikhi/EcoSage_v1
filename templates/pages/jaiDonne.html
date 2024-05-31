@@ -1,140 +1,152 @@
 {%load static %}
 <!DOCTYPE html>
 <html :class="{ 'theme-dark': dark }" x-data="data()" lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rapports - ÉcoSage</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <title>ÉcoSage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="{% static 'assets/css/tailwind.output.css' %}" />
-    <script
-      src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
-      defer
-    ></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <script src="{% static 'assets/js/init-alpine.js' %}"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="{% static '/assets/css/tailwind.output.css' %}" />
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
-  
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <script src="{% static 'assets/js/init-alpine.js' %}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
-  </head>
-  <body>
-    <div
-      class="flex h-screen bg-gray-50 dark:bg-gray-900"
-      :class="{ 'overflow-hidden': isSideMenuOpen}"
-    >
-      <!-- Desktop sidebar -->
-      {% include 'nav.html' %}
+</head>
+
+<body>
+    <div class="flex h-screen bg-gray-50 dark:bg-gray-900" :class="{ 'overflow-hidden': isSideMenuOpen}">
+        <!-- Desktop sidebar -->
+        {% include 'nav.html' %}
         <main class="h-full pb-16 overflow-y-auto">
-          <!-- Remove everything INSIDE this div to a really blank page -->
-          <div class="container px-6 mx-auto grid">
-            <h2 class="my-6 text-2xl font-semibold text-red-700 dark:text-red-700">
-                Nouvelle transaction {% if budget_limit_active %}(Limite budgétaire activée){% else %}(Limite budgétaire désactivée){% endif %}
-            </h2>
-            
-            
-            <div class="p-4 mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
-                <form id="transactionForm" action="{% url 'jai_donne' %}" method="post">
-                    {% csrf_token %}
-                    <div>
-                        <label class="block mt-4 text-sm">
-                        <span class="text-gray-700 dark:text-gray-400">Title</span>
-                        <div class="relative text-gray-500 focus-within:text-red-600 dark:focus-within:text-red-400">
-                            <input type="text" name="title"  required
-                                   class="block w-full pr-10 mt-1 text-m text-red-700 dark:bg-gray-700 focus:border-red-100 focus:shadow-outline-red form-input appearance-none"
-                                   placeholder="Title" />
+            <!-- Remove everything INSIDE this div to a really blank page -->
+            <div class="container px-6 mx-auto grid">
+                <h2 class="my-6 text-2xl font-semibold text-red-700 dark:text-red-700">
+                    Nouvelle transaction {% if budget_limit_active %}(Limite budgétaire activée){% else %}(Limite
+                    budgétaire désactivée){% endif %}
+                </h2>
+                <div class="p-4 mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-xs">
+                    <form id="transactionForm" action="{% url 'jai_donne' %}" method="post">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block mt-4 text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Title</span>
+                                <div
+                                    class="relative text-gray-500 focus-within:text-red-600 dark:focus-within:text-red-400">
+                                    <input type="text" name="title" required
+                                        class="block w-full pr-10 mt-1 text-m text-red-700 dark:bg-gray-700 focus:border-red-100 focus:shadow-outline-red form-input appearance-none"
+                                        placeholder="Title" />
+                                </div>
+                            </label>
+                            <label class="block mt-4 text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">j'ai donné</span>
+                                <div
+                                    class="relative text-gray-500 focus-within:text-red-600 dark:focus-within:text-red-400">
+                                    <input type="number" name="amount" inputmode="numeric" required
+                                        class="block w-full pr-10 mt-1 text-m text-red-700 dark:bg-gray-700 focus:border-red-100 focus:shadow-outline-red form-input appearance-none"
+                                        placeholder="0.0" />
+                                    <div
+                                        class="absolute inset-y-0 right-0 font-semibold flex items-center mr-3 pointer-events-none text-red-700">
+                                        DH
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="block mt-4 text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">catégorie</span>
+                                <select name="category" required
+                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
+                                    <option value="alimentation">alimentation</option>
+                                    <option value="logement">logement</option>
+                                    <option value="transport">transport</option>
+                                    <option value="divertissement">divertissement</option>
+                                    <option value="autre">autre</option>
+                                </select>
+                            </label>
+                            <label class="block mt-4 text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Détails</span>
+                                <textarea name="details" required
+                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-textarea focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray"
+                                    rows="2" placeholder="Enter some long form content."></textarea>
+                            </label>
+                            <label class="block mt-4 text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Date</span>
+                                <div
+                                    class="relative text-gray-500 focus-within:text-green-600 dark:focus-within:text-green-400">
+                                    <input type="date" id="dateInput" name="date" required
+                                        class="block w-full pr-10 mt-1 text-m text-black dark:text-gray-300 dark:bg-gray-700 focus:border-red-100 focus:shadow-outline-red form-input appearance-none" />
+                                    <div
+                                        class="absolute inset-y-0 right-0 flex items-center mr-3 pointer-events-none text-green-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" style="fill: rgb(180, 20, 20);">
+                                            <path
+                                                d="M7 11h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2zm0 4h2v2h-2z">
+                                            </path>
+                                            <path
+                                                d="M5 22h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2h-2V2h-2v2H9V2H7v2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2zM19 8l.001 12H5V8h14z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </label>
+
+
+
                         </div>
-                        </label>
-                        <label class="block mt-4 text-sm">
-                            <span class="text-gray-700 dark:text-gray-400">j'ai donné</span>
-                            <div class="relative text-gray-500 focus-within:text-red-600 dark:focus-within:text-red-400">
-                                <input type="number" name="amount" inputmode="numeric" required
-                                       class="block w-full pr-10 mt-1 text-m text-red-700 dark:bg-gray-700 focus:border-red-100 focus:shadow-outline-red form-input appearance-none"
-                                       placeholder="0.0" />
-                                <div class="absolute inset-y-0 right-0 font-semibold flex items-center mr-3 pointer-events-none text-red-700">
-                                    DH
-                                </div>
-                            </div>
-                        </label>
-                        <label class="block mt-4 text-sm">
-                            <span class="text-gray-700 dark:text-gray-400">catégorie</span>
-                            <select name="category" required class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
-                                <option value="alimentation">alimentation</option>
-                                <option value="logement">logement</option>
-                                <option value="transport">transport</option>
-                                <option value="divertissement">divertissement</option>
-                                <option value="autre">autre</option>
-                            </select>
-                        </label>
-                        <label class="block mt-4 text-sm">
-                            <span class="text-gray-700 dark:text-gray-400">Détails</span>
-                            <textarea name="details" class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-textarea focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray" rows="2" placeholder="Enter some long form content."></textarea>
-                        </label>
-                        <label class="block mt-4 text-sm">
-                            <span class="text-gray-700 dark:text-gray-400">Date</span>
-                            <div class="relative text-gray-500 focus-within:text-green-600 dark:focus-within:text-green-400">
-                                <input type="date" id="dateInput" name="date" required
-                                       class="block w-full pr-10 mt-1 text-m text-black dark:text-gray-300 dark:bg-gray-700 focus:border-red-100 focus:shadow-outline-red form-input appearance-none" />
-                                <div class="absolute inset-y-0 right-0 flex items-center mr-3 pointer-events-none text-green-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgb(180, 20, 20);">
-                                        <path d="M7 11h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2zm0 4h2v2h-2z"></path>
-                                        <path d="M5 22h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2h-2V2h-2v2H9V2H7v2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2zM19 8l.001 12H5V8h14z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </label>
-                        
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function() {
-                                const dateInput = document.getElementById('dateInput');
-                                const today = new Date().toISOString().split('T')[0];
-                                dateInput.value = today;
-                            });
-                        </script>
-                        
-                    </div>
-                    
-                        <button style="margin: 15px 0; ;"
-                        type="submit" class="w-full px-5 py-3 text-sm font-medium leading-5 text-red-700 hover:text-red-100 dark:text-red-100 transition-colors duration-150 bg-red-100 dark:bg-red-700 border border-transparent rounded-lg active:bg-red-600 hover:bg-red-700 focus:outline-none focus:shadow-outline-red">
+
+                        <button style="margin: 15px 0; ;" type="submit"
+                            class="w-full px-5 py-3 text-sm font-medium leading-5 text-red-700 hover:text-red-100 dark:text-red-100 transition-colors duration-150 bg-red-100 dark:bg-red-700 border border-transparent rounded-lg active:bg-red-600 hover:bg-red-700 focus:outline-none focus:shadow-outline-red">
                             Terminer
                         </button>
 
-                    {% if messages %}
-                    <ul>
-                        {% for message in messages %}
+                        {% if messages %}
+                        <ul>
+                            {% for message in messages %}
                             <li>
                                 {% if message.tags %}
-                                    <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-                                        <span class="font-medium">{{ message }}</span>
-                                    </div>
+                                <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                                    role="alert">
+                                    <span class="font-medium">{{ message }}</span>
+                                </div>
                                 {% else %}
-                                    <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">{{ message }}</div>
+                                <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                                    role="alert">{{ message }}</div>
                                 {% endif %}
                             </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
 
 
-                </form>
-                
+                    </form>
+
+                </div>
             </div>
-        </div>
-        
-              </div>
-              
-             
-           </div>
-          </div>
-        </main>
-      </div>
+
     </div>
-  </body>
+
+
+    </div>
+    </div>
+    </main>
+    </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateInput = document.getElementById('dateInput');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+        });
+    </script>
+</body>
+
 </html>

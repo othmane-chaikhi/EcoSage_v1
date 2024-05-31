@@ -50,3 +50,30 @@ function data() {
   }
   
 }
+
+    // Get the modal elements
+ var budgetModal = document.getElementById("budgetModal");
+
+// Get the button that opens the modals
+var budgetButton = document.getElementById("budgetButton");
+
+// Get the <span> element that closes the modals
+var budgetClose = budgetModal.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the respective modal
+budgetButton.onclick = function() {
+ budgetModal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+budgetClose.onclick = function() {
+ budgetModal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+ if (event.target == budgetModal) {
+     budgetModal.style.display = "none";
+ }
+}
+

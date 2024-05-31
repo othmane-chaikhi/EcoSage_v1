@@ -1,41 +1,29 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import UserEditForm
-from .forms import BudgetForm
-from .decorators import login_required  # Import the custom decorator
-from .forms import ProfilePhotoForm, UsernameForm, UserPasswordChangeForm
-from .models import Transaction
-from django.http import JsonResponse
-from .models import UserAccount, Transaction
+from .forms import UserEditForm,BudgetForm,ProfilePhotoForm, UsernameForm, UserPasswordChangeForm,BudgetLimitForm,TransactionForm
+from .decorators import login_required  
+from .models import Transaction,UserAccount, Transaction
 from datetime import datetime
 from decimal import Decimal
-from .forms import BudgetLimitForm
 from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404, redirect
-from .forms import TransactionForm
 import csv
-from io import BytesIO
-from openpyxl import Workbook
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 import xlsxwriter
-import csv
-from io import BytesIO
-from openpyxl import Workbook
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+
+
 
 def calculate_balance(user_account):
     return user_account.soldePris - user_account.soldeDepense
-
 @login_required
 def transaction_detail(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
 
     if request.method == 'POST':
-        original_amount = transaction.amount
+        original_amount = abs(transaction.amount)
         original_transaction_type = transaction.transaction_type
         
         # Delete the transaction
@@ -47,68 +35,117 @@ def transaction_detail(request, transaction_id):
             user_account.soldePris -= original_amount
             user_account.soldePris = max(user_account.soldePris, 0)
         else:
-            user_account.soldeDepense += original_amount
+            user_account.soldeDepense -= original_amount
 
         user_account.save()
 
         return redirect('home')
-
+    user_account = UserAccount.objects.get(user=request.user)
     return render(request, 'pages/transaction_detail.html', {
         'transaction': transaction,
+        'user_photo': user_account.photo.url if user_account.photo else None,
     })
+def calculate_balance(user_account):
+    return user_account.soldePris - abs(user_account.soldeDepense)
+
 @login_required
 def transaction_modify(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
     original_transaction_type = transaction.transaction_type
     original_amount = transaction.amount
+    original_amount_abs = abs(original_amount)
 
     if request.method == 'POST':
         form = TransactionForm(request.POST, instance=transaction)
         if form.is_valid():
             updated_transaction = form.save(commit=False)
             updated_amount = updated_transaction.amount
-            updated_transaction.save()
+            updated_amount_abs = abs(updated_amount)
 
-            # Update the user account balances based on the changes in the transaction
             user_account = UserAccount.objects.get(user=request.user)
+            budget_limit_active = user_account.budget_limit_active
+            budget = user_account.budget
 
-            # Revert the original transaction's impact on balances
+           # Annuler l'impact de la transaction d'origine sur les soldes
             if original_transaction_type == 'PRIS':
-                user_account.soldePris -= original_amount
+                user_account.soldePris -= original_amount_abs
             else:
-                user_account.soldeDepense += original_amount
+                user_account.soldeDepense -= original_amount_abs
 
-            # Apply the updated transaction's impact on balances
+            # Appliquer l'impact de la transaction mise à jour sur les soldes et vérifier le budget
             if updated_transaction.transaction_type == 'PRIS':
-                user_account.soldePris += updated_amount
+                user_account.soldePris += updated_amount_abs
             else:
-                user_account.soldeDepense -= updated_amount
+                new_solde_depense = user_account.soldeDepense + updated_amount_abs
+                if budget_limit_active and new_solde_depense > budget:
+                    messages.error(request, 'La transaction dépasse le budget. Veuillez revoir vos dépenses.')
+                    # Remettre les soldes à l'état d'origine
+                    if original_transaction_type == 'PRIS':
+                        user_account.soldePris += original_amount_abs
+                    else:
+                        user_account.soldeDepense += original_amount_abs
+                        
+                    return redirect('transaction_modify', transaction_id=transaction.id)
+                user_account.soldeDepense += updated_amount_abs
+                
 
-            # Recalculate the balance
+            # Recalculer la soudure
             user_account.balance = calculate_balance(user_account)
-
+            
             user_account.save()
 
+            updated_transaction.save()
+            messages.success(request, 'Transaction modifiée avec succès.')
             return redirect('transaction_detail', transaction_id=transaction.id)
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Error in {field}: {error}")
+            messages.error(request, 'Soumission du formulaire invalide. Se il vous plaît corriger les erreurs ci-dessous.')
     else:
         form = TransactionForm(instance=transaction)
-
+    user_account = UserAccount.objects.get(user=request.user)
     return render(request, 'pages/transaction_modify.html', {
         'transaction': transaction,
         'form': form,
+        'user_photo': user_account.photo.url if user_account.photo else None,
     })
+def calculate_balance(user_account):
+    return user_account.soldePris - abs(user_account.soldeDepense)
+
+@login_required
+def reset_account(request):
+    if request.method == 'POST':
+        user_account = get_object_or_404(UserAccount, user=request.user)
+        
+        # Supprimer toutes les transactions
+        Transaction.objects.filter(user=request.user).delete()
+
+        # Réinitialiser les valeurs du compte
+        user_account.soldePris = 0
+        user_account.soldeDepense = 0
+        user_account.balance = 0
+        user_account.budget = 0
+        user_account.budget_limit_active = False
+        user_account.save()
+
+        messages.success(request, 'Toutes les valeurs et transactions ont été réinitialisées..')
+    return redirect('home')
+
 @login_required
 def home(request):
     try:
-        # Attempt to retrieve the UserAccount associated with the current user
+        # Tentative de récupérer le UserAccount associé à l'utilisateur actuel
         user_account = UserAccount.objects.get(user=request.user)
     except UserAccount.DoesNotExist:
-        # If UserAccount does not exist, create it
+        # Si UserAccount n'existe pas, créez-le
         user_account = UserAccount.objects.create(user=request.user)
-        # You might want to add more fields to the UserAccount upon creation
+        # Vous souhaiterez peut-être ajouter plus de champs au compte utilisateur lors de la création
         
     if 'activate_budget_limit' in request.POST:
             user_account = UserAccount.objects.get(user=request.user)
+            solde_depense_abs = abs(user_account.soldeDepense)
+            user_account.budget = solde_depense_abs
             user_account.budget_limit_active = True
             user_account.save()
             return redirect('home')
@@ -117,6 +154,15 @@ def home(request):
             user_account.budget_limit_active = False
             user_account.save()
             return redirect('home')
+    query = request.GET.get('query')
+    if query:
+        transactions = Transaction.objects.filter(
+            user=request.user,
+            title__icontains=query  # Adjust this field based on your Transaction model
+        )
+    else:
+        transactions = Transaction.objects.filter(user=request.user).order_by('-date')
+        
     # Retrieve transaction information
     transactions = Transaction.objects.filter(user=request.user)  # Assuming transactions are related to the logged-in user
     
@@ -130,10 +176,10 @@ def home(request):
     # Calculate balance and solde based on transactions
     balance = calculate_balance(user_account)
     solde_pris = +user_account.soldePris
-    solde_depense = -user_account.soldeDepense 
+    solde_depense = +user_account.soldeDepense 
     budget = user_account.budget
      
-    rest_budget = user_account.budget + solde_depense
+    rest_budget = budget - abs(solde_depense)
     budget_limit_active = user_account.budget_limit_active
     context = {
         'balance': balance,
@@ -145,9 +191,11 @@ def home(request):
         'rest': rest_budget,
         'solde_depense_abs': abs(solde_depense),
         'budget_limit_active': budget_limit_active,
+        'query':query,
     }
 
     return render(request, 'index.html', context)
+
 @login_required
 def rapport(request):
     user_account = UserAccount.objects.get(user=request.user)
@@ -166,7 +214,7 @@ def rapport(request):
         'transaction_count': transactions.count(),
     }
 
-    # Check if the request is for downloading a report
+    # Vérifiez si la demande concerne le téléchargement d'un rapport
     if 'download' in request.GET:
         format = request.GET.get('format')
         if format == 'csv':
@@ -184,18 +232,23 @@ def download_report(request, file_format):
     transactions = Transaction.objects.filter(user=request.user)
     
     if file_format == 'csv':
-        return download_csv(transactions)
+        return download_csv(transactions, user_account)
     elif file_format == 'xlsx':
-        return download_xlsx(transactions)
+        return download_xlsx(transactions, user_account)
     elif file_format == 'pdf':
-        return download_pdf(transactions)
+        return download_pdf(transactions, user_account)
     else:
         messages.error(request, 'Invalid file format.')
         return redirect('rapport')
-
-def download_csv(transactions):
+def download_csv(transactions, user_account):
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="rapport.csv"'
+    
+    # Generate a timestamp
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    
+    # Generate the filename
+    filename = f'{user_account.user.username}_EcoSage-rapport_{timestamp}.csv'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
     writer = csv.writer(response)
     writer.writerow(['Title', 'Amount', 'Category', 'Details', 'Date'])
@@ -203,23 +256,41 @@ def download_csv(transactions):
     for transaction in transactions:
         writer.writerow([transaction.title, transaction.amount, transaction.category, transaction.details, transaction.date])
 
-    return response
+    # Calculate totals
+    total_amount = sum(transaction.amount for transaction in transactions)
+    total_solde_depense = abs(user_account.soldeDepense)
+    total_solde_pris = user_account.soldePris
+    total_balance = user_account.balance
 
-def download_xlsx(transactions):
+    # Add totals to the CSV
+    writer.writerow([])  # Add an empty row for spacing
+    writer.writerow(['Total Amount:', total_amount])
+    writer.writerow(['Total Solde Depensé:', total_solde_depense])
+    writer.writerow(['Total Solde Pris:', total_solde_pris])
+    writer.writerow(['Total Balance:', total_balance])
+
+    return response
+def download_xlsx(transactions, user_account):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="rapport.xlsx"'
+    
+    # Generate a timestamp
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    
+    # Generate the filename
+    filename = f'{user_account.user.username}_EcoSage-rapport_{timestamp}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
     workbook = xlsxwriter.Workbook(response, {'in_memory': True})
     worksheet = workbook.add_worksheet()
 
     # Add headers
     headers = ['Title', 'Amount', 'Category', 'Details', 'Date']
-    header_format = workbook.add_format({'bold': True, 'bg_color': '#F9DA04', 'border': 1})
+    header_format = workbook.add_format({'bold': True, 'bg_color': '#4287f5', 'border': 2})
     for col_num, header in enumerate(headers):
         worksheet.write(0, col_num, header, header_format)
 
     # Add data
-    data_format = workbook.add_format({'border': 1})
+    data_format = workbook.add_format({'border': 2})
     for row_num, transaction in enumerate(transactions, start=1):
         worksheet.write(row_num, 0, transaction.title, data_format)
         worksheet.write(row_num, 1, transaction.amount, data_format)
@@ -227,50 +298,96 @@ def download_xlsx(transactions):
         worksheet.write(row_num, 3, transaction.details, data_format)
         worksheet.write(row_num, 4, str(transaction.date), data_format)
 
+    # Set column widths
+    # Set column widths
+    column_widths = [len(header) for header in headers]  # Initialize with header lengths
+    for transaction in transactions:
+        for i, header in enumerate(headers):
+            value = getattr(transaction, header.lower())  # Get attribute value dynamically
+            if len(str(value)) > column_widths[i]:
+                column_widths[i] = len(str(value))
+
+    for i, width in enumerate(column_widths):
+        worksheet.set_column(i, i, width + 2)  # Add some padding
+
+    
+    # Calculate totals and add them to the XLSX
+    total_amount = sum(transaction.amount for transaction in transactions)
+    total_solde_depense = abs(user_account.soldeDepense)
+    total_solde_pris = user_account.soldePris
+    total_balance = user_account.balance
+
+    row_num += 2  # Add a couple of empty rows for spacing
+    worksheet.write(row_num, 0, 'Total Amount:', data_format)
+    worksheet.write(row_num, 1, total_amount, data_format)
+    worksheet.write(row_num + 1, 0, 'Total Solde Depensé:', data_format)
+    worksheet.write(row_num + 1, 1, total_solde_depense, data_format)
+    worksheet.write(row_num + 2, 0, 'Total Solde Pris:', data_format)
+    worksheet.write(row_num + 2, 1, total_solde_pris, data_format)
+    worksheet.write(row_num + 3, 0, 'Total Balance:', data_format)
+    worksheet.write(row_num + 3, 1, total_balance, data_format)
+
     workbook.close()
     return response
-
-def download_pdf(transactions):
+def download_pdf(transactions, user_account):
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="rapport.pdf"'
+    
+    # Generate a timestamp
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    
+    # Generate the filename
+    filename = f'{user_account.user.username}_EcoSage-rapport_{timestamp}.pdf'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
     pdf = canvas.Canvas(response, pagesize=letter)
-    pdf.setTitle('Rapport')
+    pdf.setTitle('EcoSage Rapport ')
 
+    # Add user photo if available
+    if user_account.photo:
+        user_photo_path = user_account.photo.path
+        pdf.drawImage(ImageReader(user_photo_path), 30, 650, width=100, height=100, preserveAspectRatio=True)
+
+    # Define starting position and font size
+    x, y = 30, 600
+    font_size = 12
+    
     # Header
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawString(30, 750, 'Title')
-    pdf.drawString(130, 750, 'Amount')
-    pdf.drawString(230, 750, 'Category')
-    pdf.drawString(330, 750, 'Details')
-    pdf.drawString(430, 750, 'Date')
+    pdf.setFont("Helvetica-Bold", font_size)
+    pdf.drawString(x, y, 'Title')
+    pdf.drawString(x + 100, y, 'Amount')
+    pdf.drawString(x + 200, y, 'Category')
+    pdf.drawString(x + 300, y, 'Details')
+    pdf.drawString(x + 400, y, 'Date')
 
     # Add data
-    y = 730
-    pdf.setFont("Helvetica", 10)
+    font_size = 10  # Reset font size for data
+    y -= 20  # Move to the next row
+    pdf.setFont("Helvetica", font_size)
     for transaction in transactions:
-        pdf.drawString(30, y, transaction.title)
-        pdf.drawString(130, y, str(transaction.amount))
-        pdf.drawString(230, y, transaction.category)
-        pdf.drawString(330, y, transaction.details)
-        pdf.drawString(430, y, str(transaction.date))
+        pdf.drawString(x, y, transaction.title[:20])  # Adjust text length for the title
+        pdf.drawString(x + 100, y, str(transaction.amount))
+        pdf.drawString(x + 200, y, transaction.category[:20])  # Adjust text length for the category
+        pdf.drawString(x + 300, y, transaction.details[:20])  # Adjust text length for the details
+        pdf.drawString(x + 400, y, str(transaction.date))
         y -= 20
 
         if y < 50:  # New page if data exceeds the current page
             pdf.showPage()
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(30, 750, 'Title')
-            pdf.drawString(130, 750, 'Amount')
-            pdf.drawString(230, 750, 'Category')
-            pdf.drawString(330, 750, 'Details')
-            pdf.drawString(430, 750, 'Date')
-            y = 730
+            x, y = 30, 750  # Reset coordinates
+            pdf.setFont("Helvetica-Bold", font_size)
+            pdf.drawString(x, y, 'Title')
+            pdf.drawString(x + 100, y, 'Amount')
+            pdf.drawString(x + 200, y, 'Category')
+            pdf.drawString(x + 300, y, 'Details')
+            pdf.drawString(x + 400, y, 'Date')
+            font_size = 10  # Reset font size for data
+            y -= 20  # Move to the next row
 
     pdf.save()
     return response
-
 def calculate_balance(user_account):
     return user_account.soldePris - user_account.soldeDepense
+
 @login_required 
 def statistiques(request):
      # Retrieve user account information
@@ -295,6 +412,7 @@ def statistiques(request):
         'user_photo': user_account.photo.url if user_account.photo else None,
     }
     return render(request,'pages/statistiques.html',context)
+
 @login_required
 def profile(request):
      # Retrieve user account information
@@ -318,6 +436,7 @@ def profile(request):
     }
     user = request.user
     return render(request,'pages/profile.html',{'user': user},context)
+
 @login_required
 def profile(request):
     if request.method == 'POST':
@@ -342,19 +461,23 @@ def profile(request):
     user_photo = user_account.photo.url if user_account.photo else ''
     
     return render(request, 'pages/profile.html', {'form': form, 'user_photo': user_photo})
+
 @login_required
 def settings(request):
     if request.method == 'POST':
         if 'activate_budget_limit' in request.POST:
             user_account = UserAccount.objects.get(user=request.user)
+            solde_depense_abs = abs(user_account.soldeDepense)
+            user_account.budget = solde_depense_abs
             user_account.budget_limit_active = True
             user_account.save()
             return redirect('settings')
-        elif 'deactivate_budget_limit' in request.POST:
+        elif 'deactivate_budget_limit' in request.POST:        
             user_account = UserAccount.objects.get(user=request.user)
             user_account.budget_limit_active = False
             user_account.save()
             return redirect('settings')
+
         elif 'photo' in request.FILES:
             photo_form = ProfilePhotoForm(request.POST, request.FILES)
             if photo_form.is_valid():
@@ -362,31 +485,35 @@ def settings(request):
                 user_account.photo = photo_form.cleaned_data['photo']
                 user_account.save()
             else:
-                messages.error(request, 'Failed to update profile photo.')
+                messages.error(request, 'Échec de la mise à jour de la photo de profil.')
         elif 'username' in request.POST:
             username_form = UsernameForm(request.POST, instance=request.user)
             if username_form.is_valid():
                 username_form.save()
                 
             else:
-                messages.error(request, 'Failed to update username.')
+                messages.error(request, 'Échec de la mise à jour de le Username.')
         elif 'old_password' in request.POST:
             password_form = UserPasswordChangeForm(user=request.user, data=request.POST)
             if password_form.is_valid():
                 password_form.save()
                 
             else:
-                messages.error(request, 'Failed to update password.')
+                messages.error(request, 'Échec de la mise à jour du mot de passe.')
         elif 'budget' in request.POST:
             budget_form = BudgetForm(request.POST)
             if budget_form.is_valid():
                 user_account = UserAccount.objects.get(user=request.user)
-                user_account.budget = budget_form.cleaned_data['budget']
-                user_account.save()
-                
+                entered_budget = budget_form.cleaned_data['budget']
+                if entered_budget >= user_account.soldeDepense:
+                    user_account.budget = entered_budget
+                    user_account.save()
+                    messages.success(request, 'Budget mis à jour avec succès.')
+                else:
+                    messages.error(request, 'Échec de la mise à jour du budget. Le budget saisi ne peut pas être supérieur au solde dépensé.')
             else:
-                messages.error(request, 'Failed to update budget.')
-        return redirect('settings')  # Redirect back to settings page after processing form
+                messages.error(request, 'Échec de la mise à jour du budget.')
+        return redirect('settings')
     else:
                 photo_form = ProfilePhotoForm()
                 username_form = UsernameForm(instance=request.user)
@@ -405,14 +532,13 @@ def settings(request):
         'user_photo': user_photo,
     })
 
-
 @login_required
 def jai_pris(request):
     if request.method == 'POST':
         try:
             amount = Decimal(request.POST['amount'])
         except (ValueError, InvalidOperation):
-            messages.error(request, 'Invalid amount. Please enter a valid number.')
+            messages.error(request, 'Montant invalide. S\'il vous plait, entrez un nombre valide.')
             return redirect('jai_pris')
         
         title = request.POST['title']
@@ -445,9 +571,9 @@ def jai_pris(request):
 def jai_donne(request):
     if request.method == 'POST':
         try:
-            amount = Decimal(request.POST['amount'])  # Convert to Decimal
+            amount = abs(Decimal(request.POST['amount']))  # Convert to Decimal
         except (ValueError, InvalidOperation):
-            messages.error(request, 'Invalid amount. Please enter a valid number.')
+            messages.error(request, 'Montant invalide. S\'il vous plait, entrez un nombre valide.')
             return redirect('jai_donne')
 
         title = request.POST['title']
@@ -483,62 +609,3 @@ def jai_donne(request):
     user_photo = user_account.photo.url if user_account.photo else None
     budget_limit_active = user_account.budget_limit_active
     return render(request, 'pages/jaiDonne.html', {'user_photo': user_photo,'budget_limit_active':budget_limit_active})
-
-    if request.method == 'POST':
-        try:
-            amount = Decimal(request.POST['amount'])  # Convert to Decimal
-        except (ValueError, InvalidOperation):
-            messages.error(request, 'Invalid amount. Please enter a valid number.')
-            return redirect('jai_donne')
-
-        category = request.POST['category']
-        details = request.POST['details']
-        date = request.POST['date']
-        
-        user_account = UserAccount.objects.get(user=request.user)
-        new_solde_depense = user_account.soldeDepense + amount
-        
-        if new_solde_depense > user_account.budget:
-            messages.error(request, 'Transaction exceeds budget. Please review your expenses.')
-            return redirect('jai_donne')
-        
-        user_account.soldeDepense = new_solde_depense
-        user_account.balance -= amount
-        user_account.save()
-
-        Transaction.objects.create(
-            user=request.user,
-            amount=-amount,  # Ensure expense amounts are negative
-            category=category,
-            details=details,
-            date=datetime.strptime(date, '%Y-%m-%d'),
-            transaction_type='DONNE'
-        )
-        
-        
-        return redirect('home')
-    
-    user_account = UserAccount.objects.get(user=request.user)
-    user_photo = user_account.photo.url if user_account.photo else None
-    return render(request, 'pages/jaiDonne.html', {'user_photo': user_photo})
-
-@login_required
-def search_transactions(request):
-    query = request.GET.get('q', '')
-    if query:
-        transactions = Transaction.objects.filter(user=request.user, title__icontains=query)
-        results = [
-            {
-                'id': transaction.id,
-                'title': transaction.title,
-                'amount': transaction.amount,
-                'date': transaction.date,
-                'description': transaction.details,
-            }
-            for transaction in transactions
-        ]
-        print(f"Results: {results}")  # Debug print statement
-
-    else:
-        results = []
-    return JsonResponse(results, safe=False)

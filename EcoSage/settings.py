@@ -134,25 +134,3 @@ LOGIN_REDIRECT_URL = '/home/'  # Redirect to the home page after login
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-import django_heroku
-import dj_database_url
-import os
-
-# Allow all host headers
-ALLOWED_HOSTS = ['*']
-
-# Static files (CSS, JavaScript, Images)
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
-
-# Simplified static file serving.
-# https://warehouse.python.org/project/whitenoise/
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Heroku database configuration
-DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
-}
-
-# Activate Django-Heroku.
-django_heroku.settings(locals())

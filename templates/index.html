@@ -6,42 +6,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ÉcoSage Dashboard</title>
-  <style>
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    input[type=number] {
-      -moz-appearance: textfield;
-      /* Firefox */
-      appearance: textfield;
-      /* Standard */
-    }
-
-    input[type="date"]::-webkit-inner-spin-button,
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      display: none;
-      -webkit-appearance: none;
-    }
-  </style>
-
-
+  
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'assets/css/tailwind.output.css' %}" />
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
-
+  
   <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
   <script src="{% static 'assets/js/init-alpine.js' %}"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
   <script>
     flatpickr(document.querySelector('input[datepicker]'), {
       dateFormat: "Y-m-d",
     });
-  </script>
+    </script>
   <script src="{% static 'assets/js/charts-lines.js' %}" defer></script>
   <script src="{% static 'assets/js/charts-pie.js' %}" defer></script>
 </head>
@@ -52,10 +32,15 @@
     <main class="h-full overflow-y-auto">
       <div class="container px-6 mx-auto grid">
         <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-          Dashboard
+          Dashboard 
         </h2>
         <!-- CTA -->
-
+        <div class="reset-button-container">
+          <form method="POST" action="{% url 'reset_account' %}">
+              {% csrf_token %}
+              <button type="submit" class=" mb-4 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">Réinitialiser toutes les valeurs</button>
+          </form>
+      </div>
 
         <!-- Cards -->
         <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
@@ -126,8 +111,39 @@
         <!-- index.html -->
 
 <h2 class="my-6 text-2xl font-semibold text-red-700 dark:text-red-700">
-  Transactions {% if budget_limit_active %}(Budget limit activated){% else %}(Budget limit deactivated){% endif %}
+  Transactions {% if budget_limit_active %}(Limite budgétaire activée)<span class=" text-gray-400">[ le budget est -> {{ budget }} ] </span> {% else %}(Limite budgétaire désactivée
+  ){% endif %} 
 </h2>
+
+<div id="budgetModal" class="modal hidden fixed inset-0 flex items-center justify-center z-50">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+      <span class="close absolute top-2 right-2 cursor-pointer text-xl">&times;</span>
+      <div class="modal-header text-lg font-semibold mb-4">Établir Un Budget</div>
+      <form id="budgetForm" method="POST">
+          {% csrf_token %}
+          {{ budget_form.as_p }}
+          <div class="modal-footer mt-4">
+
+              <button type="submit" class="button bg-blue-500 text-white py-2 px-4 rounded-lg">Submit</button>
+          </div>
+          {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                      {% if 'budget' in message.tags %}
+                          <li class="success-message">
+                              {{ message }}
+                          </li>
+                      {% endif %}
+                  {% endfor %}
+              </ul>
+              {% endif %}
+
+      </form>
+  </div>
+</div>
+
+
+
 
 <div class="w-full overflow-hidden rounded-lg shadow-xs">
   <div class="w-full overflow-x-auto">
@@ -206,82 +222,55 @@
 </div>
  {% if budget_limit_active %}
   <!-- Charts -->
+  
   <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
     Chart
   </h2>
-  <div class="grid gap-6 mb-8 md:grid-cols-2">
-    <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-      <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
-        Suivre les dépenses
-      </h4>
-      <canvas id="pie"></canvas>
-      <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
-        <!-- Chart legend -->
-        <div class="flex items-center">
-          <span class="inline-block w-3 h-3 mr-1 rounded-full" style="background-color: #fcba03;"></span>
-          <span>Rest de Budget</span>
-        </div>
-        <div class="flex items-center">
-          <span class="inline-block w-3 h-3 mr-1 bg-red-600 rounded-full"></span>
-          <span>les dépenses</span>
+  <div id="piee" data-rest="{{ rest }}" data-solde-depense-abs="{{ solde_depense_abs }}">
+    <div class="grid gap-6 mb-8 md:grid-cols-2">
+      <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
+          Suivre les dépenses
+        </h4>
+        <canvas id="pie">
+        </canvas>
+        <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
+          <!-- Chart legend -->
+          <div class="flex items-center">
+            <span class="inline-block w-3 h-3 mr-1 rounded-full" style="background-color: #fcba03;"></span>
+            <span>Rest de Budget</span>
+          </div>
+          <div class="flex items-center">
+            <span class="inline-block w-3 h-3 mr-1 bg-red-600 rounded-full"></span>
+            <span>les dépenses</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
+ 
   <form method="post" action="{% url 'home' %}">
     {% csrf_token %}
     <!-- Other form fields... -->
   
-    <button type="submit" class="sm:w-full md:w-full lg:w-full xl:w-64 mb-4 px-6 py-3 text-lg font-medium leading-6 text-center text-red-700 dark:text-red-100 bg-red-100 text-red dark:bg-red-600 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105" name="deactivate_budget_limit">Deactivate Budget Limit</button>
+    <button type="submit" class="sm:w-full md:w-full lg:w-full xl:w-64 mb-4 px-6 py-3 text-lg font-medium leading-6 text-center text-red-700 dark:text-red-100 bg-red-100 text-red dark:bg-red-600 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105" name="deactivate_budget_limit">Désactiver la limite budgétaire
+    </button>
   </form>
   {% else %}
   <form method="post" action="{% url 'home' %}">
     {% csrf_token %}
     <!-- Other form fields... -->
   
-    <button type="submit" class="sm:w-full md:w-full lg:w-full xl:w-64 mb-4 px-6 py-3 text-lg font-medium leading-6 text-center text-green-700 dark:text-green-600 bg-green-100 text-green dark:bg-green-600 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105" name="activate_budget_limit">Activate Budget Limit</button>
+    <button type="submit" class="sm:w-full md:w-full lg:w-full xl:w-64 mb-4 px-6 py-3 text-lg font-medium leading-6 text-center text-green-700 dark:text-green-600 bg-green-100 text-green dark:bg-green-600 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105" name="activate_budget_limit">Activer la limite budgétaire
+    </button>
   </form>
   {% endif %}
   </div>
   </main>
   </div>
   </div>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-    const pieConfig = {
-        type: 'doughnut',
-        data: {
-            datasets: [
-                {
-                    data: [{{ rest }}, {{ solde_depense_abs }}],
-                    /**
-                     * These colors come from Tailwind CSS palette
-                     * https://tailwindcss.com/docs/customizing-colors/#default-color-palette
-                     */
-                    backgroundColor: ['#fcba03', '#fc1c03'],
-                    label: 'Dataset 1',
-                },
-            ],
-            labels: ['Rest de Budget', 'les dépenses'],
-        },
-        options: {
-            responsive: true,
-            cutoutPercentage: 80,
-            legend: {
-                display: false,
-            },
-        },
-    };
-  
-    // change this to the id of your chart element in HTML
-    const pieCtx = document.getElementById('pie');
-    window.myPie = new Chart(pieCtx, pieConfig);
-});
-
-
-
+  <script src="{% static 'assets/js/charts-pie' %}">
 </script>
-
   <script src="https://cdn.jsdelivr.net/npm/flowbite@1.5.4/dist/flowbite.min.js"></script>
 
 
